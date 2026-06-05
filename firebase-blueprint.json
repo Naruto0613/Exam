@@ -1,0 +1,168 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing roles and identification details.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique user authentication ID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the user."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "student"],
+          "description": "Role of the user in the system."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when user profile was created."
+        }
+      },
+      "required": ["uid", "name", "email", "role", "createdAt"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Exam set created by an admin.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the exam."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the exam."
+        },
+        "subject": {
+          "type": "string",
+          "enum": ["history", "Social Studies"],
+          "description": "Subject of the exam."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["multiple-choice", "written"],
+          "description": "Type of questions in this exam."
+        },
+        "availableAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time the exam becomes available."
+        },
+        "questions": {
+          "type": "array",
+          "description": "List of questions. MC has options/correctIndex; written has only question text."
+        },
+        "creatorId": {
+          "type": "string",
+          "description": "Creator's admin user ID."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the exam was created."
+        }
+      },
+      "required": ["id", "title", "subject", "type", "availableAt", "questions", "creatorId", "createdAt"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Exam submission by a student.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique submission identifier."
+        },
+        "examId": {
+          "type": "string",
+          "description": "The ID of the exam taken."
+        },
+        "examTitle": {
+          "type": "string",
+          "description": "Exams title at submission."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Exams subject."
+        },
+        "examType": {
+          "type": "string",
+          "description": "Exams type."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "The ID of the submitting student."
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Name of the student."
+        },
+        "studentEmail": {
+          "type": "string",
+          "description": "Email of the student."
+        },
+        "answers": {
+          "type": "object",
+          "description": "Map representing answers keyed by question index or ID."
+        },
+        "score": {
+          "type": "number",
+          "description": "Final score achieved."
+        },
+        "maxScore": {
+          "type": "number",
+          "description": "Total possible score."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["submitted", "graded"],
+          "description": "Grading status of the submission."
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Admin feedback left during direct grading."
+        },
+        "gradedBy": {
+          "type": "string",
+          "description": "Admin user ID who graded the written exam."
+        },
+        "gradedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when manual grading occurred."
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the student submitted."
+        }
+      },
+      "required": ["id", "examId", "examTitle", "subject", "examType", "studentId", "studentName", "studentEmail", "answers", "score", "maxScore", "status", "submittedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Users of the exam system, categorized into admins and students."
+    },
+    "/exams/{examId}": {
+      "schema": "Exam",
+      "description": "Exams created by the admins."
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Submissions and automatic or manual grading status per student execution."
+    }
+  }
+}

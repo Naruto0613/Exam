@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Georgia", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Base resets or modifications */
+body {
+  background-color: #F5F2ED;
+  color: #1A1A1A;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Editorial helper classes */
+.editorial-border {
+  border-color: #D1CDC7;
+}
+
+.editorial-bg {
+  background-color: #F5F2ED;
+}
+
+.editorial-dark {
+  background-color: #1A1A1A;
+}
+
+.editorial-text-dark {
+  color: #1A1A1A;
+}

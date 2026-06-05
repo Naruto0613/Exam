@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Authentication and Identity helper blocks
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "teacheradmin@exam.mn" || 
+        request.auth.token.email == "adminnaba@exam.mn" ||
+        request.auth.token.email == "naranbadrakh1013@gmail.com"
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 1. Users rules block
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid == userId
+          && data.uid is string
+          && data.name is string && data.name.size() <= 100
+          && data.email is string && data.email.size() <= 100
+          && data.role is string && (data.role == "admin" || data.role == "student")
+          && data.createdAt is timestamp
+          && (data.email == "teacheradmin@exam.mn" || data.email == "adminnaba@exam.mn" || data.email == "naranbadrakh1013@gmail.com" ? data.role == "admin" : data.role == "student")
+          && data.keys().hasAll(['uid', 'name', 'email', 'role', 'createdAt'])
+          && data.keys().size() == 5;
+      }
+
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn() && isAdmin();
+      allow create: if isSignedIn() && isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isSignedIn() && (
+        (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])) ||
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // 2. Exams rules block
+    match /exams/{examId} {
+      function isValidExam(data) {
+        return data.id == examId
+          && data.id is string
+          && data.title is string && data.title.size() <= 200
+          && data.subject is string && (data.subject == "history" || data.subject == "Social Studies")
+          && data.type is string && (data.type == "multiple-choice" || data.type == "written")
+          && data.availableAt is timestamp
+          && data.questions is list && data.questions.size() <= 100
+          && data.creatorId is string
+          && data.createdAt is timestamp
+          && data.keys().hasAll(['id', 'title', 'subject', 'type', 'availableAt', 'questions', 'creatorId', 'createdAt'])
+          && data.keys().size() == 8;
+      }
+
+      allow list: if isSignedIn();
+      allow get: if isSignedIn() && (isAdmin() || resource.data.availableAt <= request.time);
+      allow create: if isSignedIn() && isAdmin() && isValidExam(request.resource.data) && request.resource.data.creatorId == request.auth.uid && request.resource.data.createdAt == request.time;
+      allow update: if isSignedIn() && isAdmin() && isValidExam(request.resource.data) && request.resource.data.creatorId == resource.data.creatorId;
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // 3. Submissions rules block
+    match /submissions/{submissionId} {
+      function isValidSubmissionCreate(data) {
+        return data.id == submissionId
+          && data.id is string
+          && data.examId is string
+          && data.examTitle is string && data.examTitle.size() <= 200
+          && data.subject is string && (data.subject == "history" || data.subject == "Social Studies")
+          && data.examType is string && (data.examType == "multiple-choice" || data.examType == "written")
+          && data.studentId == request.auth.uid
+          && data.studentName is string && data.studentName.size() <= 100
+          && data.studentEmail == request.auth.token.email
+          && data.answers is map
+          && data.score is number
+          && data.maxScore is number
+          && data.status == "submitted"
+          && data.submittedAt == request.time
+          && data.keys().hasAll(['id', 'examId', 'examTitle', 'subject', 'examType', 'studentId', 'studentName', 'studentEmail', 'answers', 'score', 'maxScore', 'status', 'submittedAt'])
+          && data.keys().size() == 13;
+      }
+
+      allow get: if isSignedIn() && (resource.data.studentId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.studentId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidSubmissionCreate(request.resource.data) && exists(/databases/$(database)/documents/exams/$(request.resource.data.examId));
+      allow update: if isSignedIn() && (
+        // Administrators grading the written submission
+        isAdmin() && (
+          request.resource.data.status == "graded" &&
+          request.resource.data.gradedBy == request.auth.uid &&
+          request.resource.data.gradedAt == request.time &&
+          request.resource.data.score is number &&
+          request.resource.data.feedback is string &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'feedback', 'score', 'gradedBy', 'gradedAt'])
+        )
+      );
+      allow delete: if isSignedIn() && isAdmin();
+    }
+  }
+}

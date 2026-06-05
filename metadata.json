@@ -1,0 +1,6 @@
+{
+  "name": "Exam Website",
+  "description": "Full-stack Curricular Exam assessment website with Multiple Choice and Written/Essay formats.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
