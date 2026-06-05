@@ -121,7 +121,7 @@ export default function AdminDashboard({ currentAdmin }: AdminDashboardProps) {
       const studentsList: UserProfile[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.role === 'student' && data.email !== 'teacheradmin@exam.mn' && data.email !== 'adminnaba@exam.mn') {
+        if (data.role === 'student' && data.email !== 'teacheradmin@exam.mn' && data.email !== 'naranbadrakh1013@gmail.com') {
           studentsList.push({
             uid: doc.id,
             name: data.name,

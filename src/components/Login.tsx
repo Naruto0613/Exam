@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
-import { auth, db, handleFirestoreError, OperationType } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { motion } from 'motion/react';
-import { Lock, Mail, User, ShieldAlert, GraduationCap, ArrowRight, Eye, EyeOff, LogIn } from 'lucide-react';
-import { UserProfile, UserRole } from '../types';
+import React, { useState } from "react";
+import { auth, db, handleFirestoreError, OperationType } from "../firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { motion } from "motion/react";
+import {
+  Lock,
+  Mail,
+  User,
+  ShieldAlert,
+  GraduationCap,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LogIn,
+} from "lucide-react";
+import { UserProfile, UserRole } from "../types";
 
 interface LoginProps {
   onAuthSuccess: (profile: UserProfile) => void;
@@ -12,9 +27,9 @@ interface LoginProps {
 
 export default function Login({ onAuthSuccess }: LoginProps) {
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -22,7 +37,10 @@ export default function Login({ onAuthSuccess }: LoginProps) {
 
   const isAdminEmail = (emailStr: string): boolean => {
     const trimmed = emailStr.trim().toLowerCase();
-    return trimmed === 'teacheradmin@exam.mn' || trimmed === 'adminnaba@exam.mn' || trimmed === 'naranbadrakh1013@gmail.com';
+    return (
+      trimmed === "battsetseggantumur112@gmail.com" ||
+      trimmed === "naranbadrakh1013@gmail.com"
+    );
   };
 
   const handleGoogleAuth = async () => {
@@ -33,19 +51,23 @@ export default function Login({ onAuthSuccess }: LoginProps) {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-      const targetEmail = user.email || '';
+      const targetEmail = user.email || "";
 
-      const userRole: UserRole = isAdminEmail(targetEmail) ? 'admin' : 'student';
+      const userRole: UserRole = isAdminEmail(targetEmail)
+        ? "admin"
+        : "student";
 
       const userProfile: UserProfile = {
         uid: user.uid,
-        name: user.displayName || (userRole === 'admin' ? 'Teacher Admin' : 'Student'),
+        name:
+          user.displayName ||
+          (userRole === "admin" ? "Teacher Admin" : "Student"),
         email: targetEmail,
         role: userRole,
         createdAt: new Date(),
       };
 
-      const userDocRef = doc(db, 'users', user.uid);
+      const userDocRef = doc(db, "users", user.uid);
       try {
         const userDocSnap = await getDoc(userDocRef);
         if (!userDocSnap.exists()) {
@@ -59,24 +81,31 @@ export default function Login({ onAuthSuccess }: LoginProps) {
         } else {
           const data = userDocSnap.data();
           userProfile.name = data.name || userProfile.name;
-          userProfile.role = data.role as UserRole || userProfile.role;
+          userProfile.role = (data.role as UserRole) || userProfile.role;
         }
       } catch (dbErr) {
-        console.warn('Firestore profile setup failed, using memory fallback:', dbErr);
+        console.warn(
+          "Firestore profile setup failed, using memory fallback:",
+          dbErr,
+        );
       }
 
       onAuthSuccess(userProfile);
     } catch (err: any) {
-      console.error('Google Auth error code:', err.code, err);
+      console.error("Google Auth error code:", err.code, err);
       setErrorCode(err.code || null);
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('Google нэвтрэх цонх холболт дуусахаас өмнө хаагдсан байна.');
-      } else if (err.code === 'auth/operation-not-allowed') {
-        setError('Google нэвтрэлт амжилтгүй боллоо. Хэрэв асуудал гарсаар байвал имэйл хаягаар нэвтрэнэ үү.');
-      } else if (err.code === 'auth/unauthorized-domain') {
-        setError('Энэхүү домайн (Domain) нь таны Firebase төсөлд зөвшөөрөгдөөгүй байна. Google нэвтрэлтийг ашиглахын тулд домайныг зөвшөөрөгдсөн жагсаалтад нэмнэ үү.');
+      if (err.code === "auth/popup-closed-by-user") {
+        setError("Google нэвтрэх цонх холболт дуусахаас өмнө хаагдсан байна.");
+      } else if (err.code === "auth/operation-not-allowed") {
+        setError(
+          "Google нэвтрэлт амжилтгүй боллоо. Хэрэв асуудал гарсаар байвал имэйл хаягаар нэвтрэнэ үү.",
+        );
+      } else if (err.code === "auth/unauthorized-domain") {
+        setError(
+          "Энэхүү домайн (Domain) нь таны Firebase төсөлд зөвшөөрөгдөөгүй байна. Google нэвтрэлтийг ашиглахын тулд домайныг зөвшөөрөгдсөн жагсаалтад нэмнэ үү.",
+        );
       } else {
-        setError(err.message || 'Google нэвтрэлтийн явцад алдаа гарлаа.');
+        setError(err.message || "Google нэвтрэлтийн явцад алдаа гарлаа.");
       }
     } finally {
       setIsSubmitting(false);
@@ -93,13 +122,13 @@ export default function Login({ onAuthSuccess }: LoginProps) {
     const targetName = name.trim();
 
     if (!targetEmail || !password) {
-      setError('Шаардлагатай талбаруудыг бүрэн бөглөнө үү.');
+      setError("Шаардлагатай талбаруудыг бүрэн бөглөнө үү.");
       setIsSubmitting(false);
       return;
     }
 
     if (isSignUp && !targetName) {
-      setError('Бүртгүүлэхийн тулд бүтэн нэрээ оруулна уу.');
+      setError("Бүртгүүлэхийн тулд бүтэн нэрээ оруулна уу.");
       setIsSubmitting(false);
       return;
     }
@@ -107,22 +136,28 @@ export default function Login({ onAuthSuccess }: LoginProps) {
     try {
       if (isSignUp) {
         // Enforce role assignment boundaries on client matching security rules
-        const userRole: UserRole = isAdminEmail(targetEmail) ? 'admin' : 'student';
+        const userRole: UserRole = isAdminEmail(targetEmail)
+          ? "admin"
+          : "student";
 
         // 1. Firebase Auth Sign Up
-        const userCredential = await createUserWithEmailAndPassword(auth, targetEmail, password);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          targetEmail,
+          password,
+        );
         const user = userCredential.user;
 
         // 2. Create User Profile
         const userProfile: UserProfile = {
           uid: user.uid,
-          name: userRole === 'admin' ? `${targetName} (Admin)` : targetName,
+          name: userRole === "admin" ? `${targetName} (Admin)` : targetName,
           email: targetEmail,
           role: userRole,
           createdAt: new Date(),
         };
 
-        const userDocRef = doc(db, 'users', user.uid);
+        const userDocRef = doc(db, "users", user.uid);
         try {
           await setDoc(userDocRef, {
             uid: userProfile.uid,
@@ -132,17 +167,25 @@ export default function Login({ onAuthSuccess }: LoginProps) {
             createdAt: userProfile.createdAt,
           });
         } catch (dbErr) {
-          handleFirestoreError(dbErr, OperationType.CREATE, `users/${user.uid}`);
+          handleFirestoreError(
+            dbErr,
+            OperationType.CREATE,
+            `users/${user.uid}`,
+          );
         }
 
         onAuthSuccess(userProfile);
       } else {
         // 1. Firebase Auth Log In
-        const userCredential = await signInWithEmailAndPassword(auth, targetEmail, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          targetEmail,
+          password,
+        );
         const user = userCredential.user;
 
         // 2. Fetch User Profile
-        const userDocRef = doc(db, 'users', user.uid);
+        const userDocRef = doc(db, "users", user.uid);
         let userProfile: UserProfile;
 
         try {
@@ -158,10 +201,15 @@ export default function Login({ onAuthSuccess }: LoginProps) {
             };
           } else {
             // Profile fallback if profile was missing (for safety)
-            const userRole: UserRole = isAdminEmail(targetEmail) ? 'admin' : 'student';
+            const userRole: UserRole = isAdminEmail(targetEmail)
+              ? "admin"
+              : "student";
             userProfile = {
               uid: user.uid,
-              name: userRole === 'admin' ? 'Teacher Admin' : (user.displayName || 'Student'),
+              name:
+                userRole === "admin"
+                  ? "Teacher Admin"
+                  : user.displayName || "Student",
               email: targetEmail,
               role: userRole,
               createdAt: new Date(),
@@ -176,10 +224,12 @@ export default function Login({ onAuthSuccess }: LoginProps) {
           }
         } catch (dbErr) {
           // If we had a permissions issue, try writing first
-          const userRole: UserRole = isAdminEmail(targetEmail) ? 'admin' : 'student';
+          const userRole: UserRole = isAdminEmail(targetEmail)
+            ? "admin"
+            : "student";
           userProfile = {
             uid: user.uid,
-            name: userRole === 'admin' ? 'Teacher Admin' : 'Student',
+            name: userRole === "admin" ? "Teacher Admin" : "Student",
             email: targetEmail,
             role: userRole,
             createdAt: new Date(),
@@ -192,20 +242,26 @@ export default function Login({ onAuthSuccess }: LoginProps) {
         onAuthSuccess(userProfile);
       }
     } catch (err: any) {
-      console.error('Firebase Auth error code:', err.code, err);
+      console.error("Firebase Auth error code:", err.code, err);
       setErrorCode(err.code || null);
-      if (err.code === 'auth/operation-not-allowed') {
-        setError('Имэйл эсвэл нууц үгээр нэвтрэх боломжгүй байна. Google-ээр нэвтрэх хэсгийг ашиглана уу.');
-      } else if (err.code === 'auth/email-already-in-use') {
-        setError('Энэ имэйл хаяг аль хэдийн бүртгэгдсэн байна. Нэвтрэх хэсгийг сонгоно уу.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Нууц үг сул байна. Хамгийн багадаа 6 тэмдэгт ашиглана уу.');
-      } else if (err.code === 'auth/invalid-credential') {
-        setError('Имэйл эсвэл нууц үг буруу байна. Шалгаад дахин оролдоно уу.');
-      } else if (err.code === 'auth/network-request-failed') {
-        setError('Сүлжээний алдаа гарлаа. Офлайн төлөв болон интернетийн холболтоо шалгана уу.');
+      if (err.code === "auth/operation-not-allowed") {
+        setError(
+          "Имэйл эсвэл нууц үгээр нэвтрэх боломжгүй байна. Google-ээр нэвтрэх хэсгийг ашиглана уу.",
+        );
+      } else if (err.code === "auth/email-already-in-use") {
+        setError(
+          "Энэ имэйл хаяг аль хэдийн бүртгэгдсэн байна. Нэвтрэх хэсгийг сонгоно уу.",
+        );
+      } else if (err.code === "auth/weak-password") {
+        setError("Нууц үг сул байна. Хамгийн багадаа 6 тэмдэгт ашиглана уу.");
+      } else if (err.code === "auth/invalid-credential") {
+        setError("Имэйл эсвэл нууц үг буруу байна. Шалгаад дахин оролдоно уу.");
+      } else if (err.code === "auth/network-request-failed") {
+        setError(
+          "Сүлжээний алдаа гарлаа. Офлайн төлөв болон интернетийн холболтоо шалгана уу.",
+        );
       } else {
-        setError(err.message || 'Бүртгэл хийхэд алдаа гарлаа.');
+        setError(err.message || "Бүртгэл хийхэд алдаа гарлаа.");
       }
     } finally {
       setIsSubmitting(false);
@@ -226,7 +282,7 @@ export default function Login({ onAuthSuccess }: LoginProps) {
             <GraduationCap className="h-9 w-9" />
           </div>
           <h1 className="font-serif text-4xl font-extrabold tracking-tight text-[#1A1A1A]">
-            {isSignUp ? 'Бүртгэл Үүсгэх' : 'Системд Нэвтрэх'}
+            {isSignUp ? "Бүртгэл Үүсгэх" : "Системд Нэвтрэх"}
           </h1>
           <p className="mt-2 font-mono text-[10px] text-[#666] uppercase tracking-widest">
             СУРГАЛТЫН ХӨТӨЛБӨРИЙН ҮНЭЛГЭЭ & ШАЛГАЛТЫН АЛБА
@@ -242,14 +298,16 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                 Сургуулийн Захиргааны Эрхүүд
               </span>
               <p className="font-sans leading-relaxed text-[#444]">
-                Багшийн хяналтын самбарт хандахын тулд доор орох хаягуудыг ашиглан нэвтрэх эсвэл бүртгүүлнэ үү:
+                Багшийн хяналтын самбарт хандахын тулд доор орох хаягуудыг
+                ашиглан нэвтрэх эсвэл бүртгүүлнэ үү:
               </p>
               <div className="font-mono bg-[#F5F2ED] border border-[#D1CDC7] px-3 py-2 text-[11px] font-semibold text-[#1A1A1A] leading-relaxed">
-                • teacheradmin@exam.mn<br />
-                • adminnaba@exam.mn
+                • teacheradmin@exam.mn
+                <br />• adminnaba@exam.mn
               </div>
               <p className="font-serif italic text-neutral-500 text-[11px]">
-                Санамж: Тэдгээрээс бусад хаягаар бүртгүүлэхэд оюутны эрхээр системд бүртгэгдэнэ.
+                Санамж: Тэдгээрээс бусад хаягаар бүртгүүлэхэд оюутны эрхээр
+                системд бүртгэгдэнэ.
               </p>
             </div>
           </div>
@@ -257,7 +315,6 @@ export default function Login({ onAuthSuccess }: LoginProps) {
 
         {/* Card containing login/signup form */}
         <div className="border border-[#1A1A1A] bg-white p-6 sm:p-8">
-          
           {/* Google Single Sign-On */}
           <button
             type="button"
@@ -271,7 +328,9 @@ export default function Login({ onAuthSuccess }: LoginProps) {
 
           <div className="relative flex py-2 items-center mb-5">
             <div className="flex-grow border-t border-[#D1CDC7]"></div>
-            <span className="flex-shrink mx-4 font-mono text-[9px] text-[#666] uppercase tracking-wider">эсвэл өөрийн бүртгэлээр</span>
+            <span className="flex-shrink mx-4 font-mono text-[9px] text-[#666] uppercase tracking-wider">
+              эсвэл өөрийн бүртгэлээр
+            </span>
             <div className="flex-grow border-t border-[#D1CDC7]"></div>
           </div>
 
@@ -283,50 +342,121 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                 </div>
 
                 {/* Highly helpful troubleshooting guidelines for operation-not-allowed */}
-                {errorCode === 'auth/operation-not-allowed' && (
+                {errorCode === "auth/operation-not-allowed" && (
                   <div className="border border-[#D1CDC7] bg-[#FFF9EB] p-4 text-xs text-[#6E4E00] space-y-2 leading-relaxed">
-                    <p className="font-bold font-serif text-sm">⚠️ Firebase Тохиргооны Заавар (Багшид зориулсан):</p>
-                    <p className="font-sans">Энэ алдаа нь таны Firebase төсөлд нэвтрэх аргуудыг идэвхжүүлээгүй үед гардаг. Холболтоо дараах алхмаар идэвхжүүлнэ үү:</p>
+                    <p className="font-bold font-serif text-sm">
+                      ⚠️ Firebase Тохиргооны Заавар (Багшид зориулсан):
+                    </p>
+                    <p className="font-sans">
+                      Энэ алдаа нь таны Firebase төсөлд нэвтрэх аргуудыг
+                      идэвхжүүлээгүй үед гардаг. Холболтоо дараах алхмаар
+                      идэвхжүүлнэ үү:
+                    </p>
                     <ol className="list-decimal pl-5 space-y-1 font-sans">
-                      <li>Firebase Консол (<a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-bold text-[#1A1A1A]">https://console.firebase.google.com/</a>) руу орно</li>
-                      <li>Өөрийн төслийг (<strong>examsite-28213</strong>) сонгоно</li>
-                      <li>Зүүн талын цэснээс <strong>Build &gt; Authentication</strong> хэсэг рүү нэвтэрч <strong>Sign-in method</strong> табыг сонгоно</li>
-                      <li><strong>Email/Password</strong> болон <strong>Google</strong> нэвтрэлтийн аргуудыг <strong>Enable</strong> болгон идэвхжүүлээд хадгална уу</li>
+                      <li>
+                        Firebase Консол (
+                        <a
+                          href="https://console.firebase.google.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-bold text-[#1A1A1A]"
+                        >
+                          https://console.firebase.google.com/
+                        </a>
+                        ) руу орно
+                      </li>
+                      <li>
+                        Өөрийн төслийг (<strong>examsite-28213</strong>) сонгоно
+                      </li>
+                      <li>
+                        Зүүн талын цэснээс{" "}
+                        <strong>Build &gt; Authentication</strong> хэсэг рүү
+                        нэвтэрч <strong>Sign-in method</strong> табыг сонгоно
+                      </li>
+                      <li>
+                        <strong>Email/Password</strong> болон{" "}
+                        <strong>Google</strong> нэвтрэлтийн аргуудыг{" "}
+                        <strong>Enable</strong> болгон идэвхжүүлээд хадгална уу
+                      </li>
                     </ol>
                   </div>
                 )}
 
                 {/* Highly helpful troubleshooting guidelines for unauthorized-domain */}
-                {errorCode === 'auth/unauthorized-domain' && (
+                {errorCode === "auth/unauthorized-domain" && (
                   <div className="border border-[#D1CDC7] bg-[#FFF9EB] p-4 text-xs text-[#6E4E00] space-y-2 leading-relaxed">
-                    <p className="font-bold font-serif text-sm">⚠️ Зөвшөөрөгдөөгүй Домайн (Unauthorized Domain) Алдааг Засах Заавар:</p>
-                    <p className="font-sans">Энэхүү апп ажиллаж буй хаяг (domain) таны Firebase төслийн зөвшөөрөгдсөн жагсаалтад бүртгэгдээгүй байна. Дараах алхмаар хялбархан шийднэ үү:</p>
+                    <p className="font-bold font-serif text-sm">
+                      ⚠️ Зөвшөөрөгдөөгүй Домайн (Unauthorized Domain) Алдааг
+                      Засах Заавар:
+                    </p>
+                    <p className="font-sans">
+                      Энэхүү апп ажиллаж буй хаяг (domain) таны Firebase төслийн
+                      зөвшөөрөгдсөн жагсаалтад бүртгэгдээгүй байна. Дараах
+                      алхмаар хялбархан шийднэ үү:
+                    </p>
                     <ol className="list-decimal pl-5 space-y-1 font-sans">
-                      <li>Firebase Консол (<a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-bold text-[#1A1A1A]">https://console.firebase.google.com/</a>) руу орно</li>
-                      <li>Өөрийн төслийг (<strong>examsite-28213</strong>) сонгоно</li>
-                      <li>Зүүн талын цэснээс <strong>Build &gt; Authentication</strong> хэсэг рүү нэвтэрч <strong>Settings</strong> табыг сонгоно</li>
-                      <li>Дэд цэснээс <strong>Authorized domains</strong> хэсгийг сонгоно</li>
-                      <li><strong>Add domain</strong> товч дээр дарж дараах хоёр хаягийг тус бүр нэмээрэй:
+                      <li>
+                        Firebase Консол (
+                        <a
+                          href="https://console.firebase.google.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-bold text-[#1A1A1A]"
+                        >
+                          https://console.firebase.google.com/
+                        </a>
+                        ) руу орно
+                      </li>
+                      <li>
+                        Өөрийн төслийг (<strong>examsite-28213</strong>) сонгоно
+                      </li>
+                      <li>
+                        Зүүн талын цэснээс{" "}
+                        <strong>Build &gt; Authentication</strong> хэсэг рүү
+                        нэвтэрч <strong>Settings</strong> табыг сонгоно
+                      </li>
+                      <li>
+                        Дэд цэснээс <strong>Authorized domains</strong> хэсгийг
+                        сонгоно
+                      </li>
+                      <li>
+                        <strong>Add domain</strong> товч дээр дарж дараах хоёр
+                        хаягийг тус бүр нэмээрэй:
                         <ul className="list-disc pl-5 mt-1 font-mono text-[11px] font-bold text-red-700 bg-neutral-100 p-2 border border-[#D1CDC7] select-all space-y-1">
-                          <li>ais-dev-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app</li>
-                          <li>ais-pre-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app</li>
-                          {window.location.hostname && window.location.hostname !== 'localhost' &&
-                           window.location.hostname !== 'ais-dev-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app' &&
-                           window.location.hostname !== 'ais-pre-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app' && (
-                            <li>{window.location.hostname}</li>
-                          )}
+                          <li>
+                            ais-dev-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app
+                          </li>
+                          <li>
+                            ais-pre-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app
+                          </li>
+                          {window.location.hostname &&
+                            window.location.hostname !== "localhost" &&
+                            window.location.hostname !==
+                              "ais-dev-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app" &&
+                            window.location.hostname !==
+                              "ais-pre-s7awhqd6p47jev5yroca6s-75661498175.asia-northeast1.run.app" && (
+                              <li>{window.location.hostname}</li>
+                            )}
                         </ul>
                       </li>
-                      <li>Нэмсний дараа энэ хуудсыг дахин шинэчилж Google-ээр нэвтэрнэ үү.</li>
+                      <li>
+                        Нэмсний дараа энэ хуудсыг дахин шинэчилж Google-ээр
+                        нэвтэрнэ үү.
+                      </li>
                     </ol>
                   </div>
                 )}
 
                 {/* Switch to signup mode easily for invalid-credential */}
-                {errorCode === 'auth/invalid-credential' && (
+                {errorCode === "auth/invalid-credential" && (
                   <div className="border border-[#D1CDC7] bg-[#EEF9F3] p-4 text-xs text-[#12622F] space-y-2 leading-relaxed">
-                    <p className="font-bold font-serif text-sm">💡 Шинэ хэрэглэгч үү?</p>
-                    <p className="font-sans">Хэрэв та урьд нь бүртгэл үүсгээгүй бол дараах товчийг дарж шинээр бүртгэл үүсгэн нэвтэрнэ үү:</p>
+                    <p className="font-bold font-serif text-sm">
+                      💡 Шинэ хэрэглэгч үү?
+                    </p>
+                    <p className="font-sans">
+                      Хэрэв та урьд нь бүртгэл үүсгээгүй бол дараах товчийг дарж
+                      шинээр бүртгэл үүсгэн нэвтэрнэ үү:
+                    </p>
                     <button
                       type="button"
                       onClick={() => {
@@ -342,10 +472,15 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                 )}
 
                 {/* Switch to login mode automatically for email-already-in-use */}
-                {errorCode === 'auth/email-already-in-use' && (
+                {errorCode === "auth/email-already-in-use" && (
                   <div className="border border-[#D1CDC7] bg-[#EEF9F3] p-4 text-xs text-[#12622F] space-y-2 leading-relaxed">
-                    <p className="font-bold font-serif text-sm">💡 Таны имэйл хаяг аль хэдийн бүртгэгдсэн байна!</p>
-                    <p className="font-sans">Тус хаягаар бүртгэл үүссэн байгаа тул та доорх товчийг дарж шууд нэвтрэх хэсэг рүү шилжинэ үү:</p>
+                    <p className="font-bold font-serif text-sm">
+                      💡 Таны имэйл хаяг аль хэдийн бүртгэгдсэн байна!
+                    </p>
+                    <p className="font-sans">
+                      Тус хаягаар бүртгэл үүссэн байгаа тул та доорх товчийг
+                      дарж шууд нэвтрэх хэсэг рүү шилжинэ үү:
+                    </p>
                     <button
                       type="button"
                       onClick={() => {
@@ -364,7 +499,10 @@ export default function Login({ onAuthSuccess }: LoginProps) {
 
             {isSignUp && (
               <div className="space-y-1.5">
-                <label htmlFor="name-input" className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">
+                <label
+                  htmlFor="name-input"
+                  className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider"
+                >
                   Бүүрэн Нэр
                 </label>
                 <div className="relative">
@@ -385,7 +523,10 @@ export default function Login({ onAuthSuccess }: LoginProps) {
             )}
 
             <div className="space-y-1.5">
-              <label htmlFor="email-input" className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">
+              <label
+                htmlFor="email-input"
+                className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider"
+              >
                 Имэйл Хаяг
               </label>
               <div className="relative">
@@ -405,7 +546,10 @@ export default function Login({ onAuthSuccess }: LoginProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password-input" className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider">
+              <label
+                htmlFor="password-input"
+                className="block font-mono text-[10px] font-bold text-[#1A1A1A] uppercase tracking-wider"
+              >
                 Нууц Үг
               </label>
               <div className="relative">
@@ -413,7 +557,7 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                   <Lock className="h-4.5 w-4.5 text-[#1A1A1A]" />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password-input"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -427,7 +571,11 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#1A1A1A] hover:opacity-80"
                   tabIndex={-1}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -442,7 +590,7 @@ export default function Login({ onAuthSuccess }: LoginProps) {
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <>
-                  <span>{isSignUp ? 'Бүртгэл Үүсгэх' : 'Системд Нэвтрэх'}</span>
+                  <span>{isSignUp ? "Бүртгэл Үүсгэх" : "Системд Нэвтрэх"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -452,7 +600,9 @@ export default function Login({ onAuthSuccess }: LoginProps) {
           {/* Mode Switch Button */}
           <div className="mt-8 flex flex-col items-center justify-center border-t border-[#D1CDC7] pt-5 text-center">
             <p className="font-serif italic text-xs text-[#666]">
-              {isSignUp ? 'Та аль хэдийн бүртгэлтэй юу?' : 'Анх удаа шалгалт өгөх гэж байна уу?'}
+              {isSignUp
+                ? "Та аль хэдийн бүртгэлтэй юу?"
+                : "Анх удаа шалгалт өгөх гэж байна уу?"}
             </p>
             <button
               type="button"
@@ -463,7 +613,7 @@ export default function Login({ onAuthSuccess }: LoginProps) {
               }}
               className="mt-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A] border-b-2 border-[#1A1A1A] pb-0.5 hover:opacity-80 focus:outline-none"
             >
-              {isSignUp ? 'Бүртгэлтэй эрхээрээ нэвтрэх' : 'Шинэ бүртгэл үүсгэх'}
+              {isSignUp ? "Бүртгэлтэй эрхээрээ нэвтрэх" : "Шинэ бүртгэл үүсгэх"}
             </button>
           </div>
         </div>
