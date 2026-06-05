@@ -20,7 +20,6 @@ export default function Login({ onAuthSuccess }: LoginProps) {
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Common Admin check
   const isAdminEmail = (emailStr: string): boolean => {
     const trimmed = emailStr.trim().toLowerCase();
     return trimmed === 'teacheradmin@exam.mn' || trimmed === 'adminnaba@exam.mn' || trimmed === 'naranbadrakh1013@gmail.com';

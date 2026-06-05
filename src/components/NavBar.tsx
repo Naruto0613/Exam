@@ -29,10 +29,10 @@ export default function NavBar({ userProfile, onLogout }: NavBarProps & { onLogo
           </div>
           <div>
             <span className="font-serif text-2xl font-black tracking-tight text-[#1A1A1A] block leading-none">
-              AURAEXAM
+              EXAM
             </span>
             <span className="font-mono text-[9px] text-[#666] uppercase tracking-widest block mt-0.5">
-              Аюулгүй Шалгалтын Платформ
+              Шалгалтын Платформ
             </span>
           </div>
         </div>
